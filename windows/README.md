@@ -25,3 +25,45 @@ BuildContext adalah objek yang memberikan informasi tentang posisi suatu widget 
 (Nomor 6) Jelaskan konsep "hot reload" di Flutter dan bagaimana bedanya dengan "hot restart".
 Hot reload adalah fitur unggulan Flutter yang memungkinkan pengembang memperbarui tampilan aplikasi secara langsung tanpa menghentikan dan menjalankan ulang seluruh aplikasi. Flutter hanya mengganti bagian kode yang berubah di memori, lalu membangun ulang widget tree tanpa menghapus data atau keadaan yang sedang berjalan. Sebaliknya, hot restart akan memulai ulang aplikasi dari awal dan menghapus seluruh state yang tersimpan. Dengan kata lain, hot reload digunakan untuk mempercepat proses pengembangan terutama pada perubahan UI, sementara hot restart digunakan ketika perubahan kode memengaruhi struktur atau logika aplikasi secara menyeluruh.
 
+
+
+
+# TUGAS 8
+
+
+(Nomor 1) Jelaskan perbedaan antara Navigator.push() dan Navigator.pushReplacement() pada Flutter. Dalam kasus apa sebaiknya masing-masing digunakan pada aplikasi Football Shop kamu?
+Navigator push
+Navigator push menambahkan halaman baru di atas halaman saat ini pada stack navigasi. Halaman lama tetap ada sehingga pengguna dapat kembali menggunakan tombol back.
+Pada aplikasi Football Shop: dipakai saat menekan tombol Tambah Produk di halaman utama. Pengguna masuk ke halaman form, dan masih bisa kembali ke halaman utama dengan back tanpa memuat ulang dari awal.
+Navigator pushReplacement
+Navigator pushReplacement mengganti halaman saat ini dengan halaman baru. Halaman lama dihapus dari stack sehingga tombol back tidak akan kembali ke halaman sebelumnya.
+Pada aplikasi Football Shop: dipakai pada navigasi melalui Drawer. Contoh, ketika memilih Tambah Produk atau Halaman Utama dari Drawer, halaman yang sedang dibuka diganti dengan halaman tujuan. Ini membuat navigasi lebih rapi dan mencegah penumpukan banyak halaman yang sama saat pengguna berkali kali memilih menu drawer.
+
+
+
+(Nomor 2)Bagaimana kamu memanfaatkan hierarchy widget seperti Scaffold, AppBar, dan Drawer untuk membangun struktur halaman yang konsisten di seluruh aplikasi?
+Scaffold digunakan sebagai kerangka utama setiap halaman. Di dalamnya terdapat AppBar, body, dan Drawer sehingga semua halaman memiliki struktur yang seragam.
+AppBar dipakai untuk menampilkan judul aplikasi Football Shop di bagian atas dengan gaya yang konsisten, sehingga pengguna selalu tahu sedang berada di aplikasi yang sama.
+Drawer ditempatkan di properti drawer milik Scaffold pada halaman utama dan halaman form. Isi Drawer sama, yaitu menu Halaman Utama dan Tambah Produk. Dengan cara ini, dari halaman mana pun pengguna selalu memiliki akses navigasi yang konsisten tanpa harus membuat ulang logika navigasi di setiap halaman.
+
+
+
+(Nomor 3)Dalam konteks desain antarmuka, apa kelebihan menggunakan layout widget seperti Padding, SingleChildScrollView, dan ListView saat menampilkan elemen-elemen form? Berikan contoh penggunaannya dari aplikasi kamu.
+Padding
+Memberi jarak di sekeliling elemen input sehingga tampilan form lebih rapi, mudah dibaca, dan tidak menempel pada tepi layar. Misalnya setiap TextFormField pada form tambah produk dibungkus Padding agar jarak antar field seragam.
+
+SingleChildScrollView
+Memungkinkan seluruh isi form digulir ketika tingginya melebihi layar, terutama pada perangkat dengan layar kecil. Pada halaman tambah produk, Form dibungkus SingleChildScrollView sehingga semua field tetap dapat diakses tanpa terpotong.
+
+ListView atau Column dalam SingleChildScrollView
+Memudahkan penataan elemen form secara vertikal dan terstruktur. Dalam aplikasi ini digunakan Column di dalam SingleChildScrollView untuk menyusun field nama produk, harga, deskripsi, kategori, url thumbnail, switch produk unggulan, dan tombol simpan secara berurutan.
+Kombinasi Padding dan tampilan yang dapat digulir membuat form lebih nyaman digunakan dan mengurangi risiko input terlewat.
+
+
+
+(Nomor 4)Bagaimana kamu menyesuaikan warna tema agar aplikasi Football Shop memiliki identitas visual yang konsisten dengan brand toko?
+Penyesuaian warna tema dilakukan pada MaterialApp dengan mendefinisikan skema warna utama yang mencerminkan brand Football Shop, misalnya menggunakan warna biru sebagai warna identitas. Warna tersebut diterapkan sebagai colorScheme primary sehingga:
+AppBar pada semua halaman memiliki warna biru yang sama.
+Drawer header dan elemen penting lain juga menggunakan warna yang konsisten.
+Tombol utama seperti tombol simpan pada form menggunakan warna yang selaras.
+Dengan cara ini, seluruh halaman terasa satu kesatuan, mudah dikenali sebagai Football Shop, dan tidak membingungkan pengguna karena perubahan warna yang tidak konsisten.
