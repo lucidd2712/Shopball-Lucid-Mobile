@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:shopball_lucid/widgets/left_drawer.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+
 import 'package:shopball_lucid/screens/product_form_page.dart';
+import 'package:shopball_lucid/screens/product_list_page.dart';
+import 'package:shopball_lucid/widgets/left_drawer.dart';
+import 'package:shopball_lucid/screens/login.dart';
 
 class ItemHomepage {
   final String name;
@@ -10,172 +15,124 @@ class ItemHomepage {
   const ItemHomepage(this.name, this.icon, this.color);
 }
 
-class InfoCard extends StatelessWidget {
-  final String title;
-  final String content;
-
-  const InfoCard({
-    super.key,
-    required this.title,
-    required this.content,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      elevation: 0.5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              content,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ItemCard extends StatelessWidget {
-  final ItemHomepage item;
-
-  const ItemCard(this.item, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: item.color,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          // SnackBar
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text('Kamu menekan tombol ${item.name}'),
-              ),
-            );
-
-          // Navigasi jika tombol Tambah Produk
-          if (item.name == 'Tambah Produk') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ProductFormPage(),
-              ),
-            );
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                item.icon,
-                size: 32,
-                color: Colors.white,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                item.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
+  final List<ItemHomepage> items = const [
+    ItemHomepage("Tambah Produk", Icons.add_box, Colors.green),
+    ItemHomepage("Lihat Daftar Produk", Icons.list, Colors.blue),
+    ItemHomepage("Logout", Icons.logout, Colors.red),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final List<ItemHomepage> items = [
-      const ItemHomepage('Tambah Produk', Icons.add_box_outlined, Colors.blue),
-      const ItemHomepage('Lihat Produk', Icons.list_alt_outlined, Colors.green),
-      const ItemHomepage('Keranjang', Icons.shopping_cart_outlined, Colors.orange),
-    ];
+    final request = context.watch<CookieRequest>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Football Shop',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        title: const Text('Shopball Lucid'),
       ),
       drawer: const LeftDrawer(),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Profil',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+            Card(
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Selamat datang di Shopball Lucid!',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Kelola produk perlengkapan sepak bola kamu di sini.',
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            const InfoCard(
-              title: 'Nama',
-              content: 'Gilang Saputra', 
-            ),
-            const InfoCard(
-              title: 'NPM',
-              content: '2406399655',
-            ),
-            const InfoCard(
-              title: 'Kelas',
-              content: 'Pemrograman Berbasis Platform',
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Menu',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 8),
             GridView.count(
               crossAxisCount: 3,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              children: items.map((e) => ItemCard(e)).toList(),
+              children: items.map((e) {
+                return InkWell(
+                  onTap: () async {
+                    if (e.name == "Tambah Produk") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProductFormPage(),
+                        ),
+                      );
+                    } else if (e.name == "Lihat Daftar Produk") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProductListPage(),
+                        ),
+                      );
+                    } else if (e.name == "Logout") {
+                      final response = await request.logout(
+                        "http://localhost:8000/auth/logout/",
+                      );
+                      final message = response["message"];
+                      if (context.mounted) {
+                        if (response['status']) {
+                          final uname = response["username"];
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text("$message See you again, $uname."),
+                            ),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(message)),
+                          );
+                        }
+                      }
+                    }
+                  },
+                  child: Card(
+                    color: e.color,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(e.icon, color: Colors.white),
+                          const SizedBox(height: 8),
+                          Text(
+                            e.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),

@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+
 import 'package:shopball_lucid/widgets/left_drawer.dart';
+import 'package:shopball_lucid/screens/menu.dart';
 
 class ProductFormPage extends StatefulWidget {
   const ProductFormPage({super.key});
@@ -14,228 +20,154 @@ class _ProductFormPageState extends State<ProductFormPage> {
   String _name = '';
   int _price = 0;
   String _description = '';
-  String _category = 'Jersey';
   String _thumbnail = '';
+  String _category = '';
   bool _isFeatured = false;
-
-  final List<String> _categories = [
-    'Jersey',
-    'Sepatu',
-    'Bola',
-    'Aksesoris',
-    'Peralatan Latihan',
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Tambah Produk Baru',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        title: const Text('Tambah Produk'),
       ),
       drawer: const LeftDrawer(),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Nama Produk
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Nama Produk',
-                  hintText: 'Contoh: Jersey Home 24/25',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onChanged: (value) => setState(() => _name = value.trim()),
-                validator: (value) {
-                  final v = value?.trim() ?? '';
-                  if (v.isEmpty) return 'Nama produk tidak boleh kosong.';
-                  if (v.length < 3) return 'Nama produk minimal 3 karakter.';
-                  if (v.length > 50) return 'Nama produk maksimal 50 karakter.';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-
-              // Harga
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Harga (Rp)',
-                  hintText: 'Contoh: 250000',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  setState(() {
-                    _price = int.tryParse(value) ?? 0;
-                  });
-                },
-                validator: (value) {
-                  final v = value?.trim() ?? '';
-                  if (v.isEmpty) return 'Harga tidak boleh kosong.';
-                  final parsed = int.tryParse(v);
-                  if (parsed == null) return 'Harga harus berupa angka.';
-                  if (parsed <= 0) return 'Harga harus lebih dari 0.';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-
-              // Deskripsi
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Deskripsi',
-                  hintText: 'Tuliskan deskripsi produk.',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                maxLines: 4,
-                onChanged: (value) =>
-                    setState(() => _description = value.trim()),
-                validator: (value) {
-                  final v = value?.trim() ?? '';
-                  if (v.isEmpty) return 'Deskripsi tidak boleh kosong.';
-                  if (v.length < 10) return 'Deskripsi minimal 10 karakter.';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-
-              // Kategori
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: 'Kategori',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                value: _category,
-                items: _categories
-                    .map(
-                      (cat) => DropdownMenuItem(
-                        value: cat,
-                        child: Text(cat),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: "Nama Produk",
+                        ),
+                        onChanged: (value) => _name = value,
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Nama wajib diisi"
+                            : null,
                       ),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _category = value ?? _category;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Kategori tidak boleh kosong.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: "Harga",
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          _price = int.tryParse(value) ?? 0;
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Harga wajib diisi";
+                          }
+                          if (int.tryParse(value) == null) {
+                            return "Harga harus berupa angka";
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: "Deskripsi",
+                        ),
+                        maxLines: 3,
+                        onChanged: (value) => _description = value,
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Deskripsi wajib diisi"
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: "URL Thumbnail Gambar",
+                        ),
+                        onChanged: (value) => _thumbnail = value,
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Thumbnail wajib diisi"
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: "Kategori",
+                        ),
+                        onChanged: (value) => _category = value,
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Kategori wajib diisi"
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      SwitchListTile(
+                        title: const Text("Featured"),
+                        value: _isFeatured,
+                        onChanged: (value) {
+                          setState(() {
+                            _isFeatured = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (!_formKey.currentState!.validate()) return;
 
-              // URL Thumbnail
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'URL Thumbnail',
-                  hintText: 'https://contoh.com/gambar-produk.jpg',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                            final response = await request.postJson(
+                              "http://localhost:8000/items/create-flutter/",
+                              jsonEncode({
+                                "name": _name,
+                                "price": _price,
+                                "description": _description,
+                                // key DISESUAIKAN dgn Django: image_url
+                                "image_url": _thumbnail,
+                                "category": _category,
+                                "is_featured": _isFeatured,
+                              }),
+                            );
+
+                            if (context.mounted) {
+                              if (response['status'] == 'success') {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text("Produk berhasil disimpan!"),
+                                  ),
+                                );
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const MyHomePage(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      response['message'] ??
+                                          "Terjadi kesalahan saat menyimpan, coba lagi.",
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          child: const Text("Simpan Produk"),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                onChanged: (value) =>
-                    setState(() => _thumbnail = value.trim()),
-                validator: (value) {
-                  final v = value?.trim() ?? '';
-                  if (v.isEmpty) return 'URL thumbnail tidak boleh kosong.';
-
-                  final uri = Uri.tryParse(v);
-                  if (uri == null ||
-                      (uri.scheme != 'http' && uri.scheme != 'https')) {
-                    return 'URL thumbnail tidak valid.';
-                  }
-
-                  return null;
-                },
               ),
-              const SizedBox(height: 12),
-
-              // Produk Unggulan
-              SwitchListTile(
-                title: const Text('Jadikan produk unggulan'),
-                value: _isFeatured,
-                onChanged: (value) {
-                  setState(() {
-                    _isFeatured = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Tombol Save
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Produk berhasil tersimpan'),
-                            content: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Nama: $_name'),
-                                  Text('Harga: Rp$_price'),
-                                  Text('Deskripsi: $_description'),
-                                  Text('Kategori: $_category'),
-                                  Text('Thumbnail: $_thumbnail'),
-                                  Text(
-                                    'Unggulan: ${_isFeatured ? "Ya" : "Tidak"}',
-                                  ),
-                                ],
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _formKey.currentState!.reset();
-                                  setState(() {
-                                    _name = '';
-                                    _price = 0;
-                                    _description = '';
-                                    _category = _categories.first;
-                                    _thumbnail = '';
-                                    _isFeatured = false;
-                                  });
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
-                  },
-                  child: const Text('Save'),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
